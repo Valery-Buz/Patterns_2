@@ -23,13 +23,51 @@ public class AuthTest {
     }
 
     @Test
-
     void shouldSuccessfulLoginIfRegisteredActiveUser() {
-        DataGenerator.RegistrationDto user=DataGenerator.Registration.getRegisteredUser("active");
+        DataGenerator.RegistrationDto user = DataGenerator.Registration.getRegisteredUser("active");
         $("[data-test-id='login'] input").sendKeys(user.getLogin());
         $("[data-test-id='password'] input").sendKeys(user.getPassword());
         $(byText("Продолжить")).click();
         $(byText("Личный кабинет")).shouldBe(Condition.visible);
+    }
+
+    @Test
+    void shouldGetErrorIfNotRegisteredUser() {
+        DataGenerator.RegistrationDto user = DataGenerator.Registration.getRegisteredUser("active");
+        DataGenerator.RegistrationDto notRegisteredUser = DataGenerator.Registration.getUser("active");
+        $("[data-test-id='login'] input").sendKeys(notRegisteredUser.getLogin());
+        $("[data-test-id='password'] input").sendKeys(user.getPassword());
+        $(byText("Продолжить")).click();
+        $("[class='notification__content']").shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"));
+    }
+
+    @Test
+    void shouldGetErrorIfBlockedUser() {
+        DataGenerator.RegistrationDto blockedUser = DataGenerator.Registration.getRegisteredUser("blocked");
+        $("[data-test-id='login'] input").sendKeys(blockedUser.getLogin());
+        $("[data-test-id='password'] input").sendKeys(blockedUser.getPassword());
+        $(byText("Продолжить")).click();
+        $("[class='notification__content']").shouldHave(Condition.text("Ошибка! Пользователь заблокирован"));
+    }
+
+    @Test
+    void shouldGetErrorIfWrongLogin() {
+        DataGenerator.RegistrationDto user = DataGenerator.Registration.getRegisteredUser("active");
+        String wrongLogin = DataGenerator.getRandomLogin();
+        $("[data-test-id='login'] input").sendKeys(wrongLogin);
+        $("[data-test-id='password'] input").sendKeys(user.getPassword());
+        $(byText("Продолжить")).click();
+        $("[class='notification__content']").shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"));
+    }
+
+    @Test
+    void shouldGetErrorIfWrongPassword() {
+        DataGenerator.RegistrationDto user = DataGenerator.Registration.getRegisteredUser("active");
+        String wrongPassword = DataGenerator.getRandomPassword();
+        $("[data-test-id='login'] input").sendKeys(user.getLogin());
+        $("[data-test-id='password'] input").sendKeys(wrongPassword);
+        $(byText("Продолжить")).click();
+        $("[class='notification__content']").shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"));
     }
 
 
